@@ -1,0 +1,93 @@
+1)Get the URL of static website deployed on AWS- If you have ever deployed an static website on S3 bucket then you can print the website_endpoint using the output variables in terraform -
+
+resource "aws_s3_bucket" "example" {
+  bucket = "example-bucket"
+  acl    = "public-read"
+  website {
+    index_document = "index.html"
+  }
+}
+
+# The following output block will print the URL of static website deployed on S3 Bucket
+output "website_url" {
+  value = aws_s3_bucket.example.website_endpoint
+}
+
+2)Exporting the ARN of an AWS IAM role - Exporting the ARN of an AWS IAM role to be used by other parts of the infrastructure for granting permissions.
+
+resource "aws_iam_role" "example" {
+  name = "example"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+#print the arn using the output variable
+output "role_arn" {
+  value = aws_iam_role.example.arn
+} 
+
+3)How do you output multiple values in Terraform?
+In Terraform, you can output multiple values by defining multiple output blocks in your configuration. Each output block should have a unique name and a corresponding value.
+
+For example, you could output both the public and private IP addresses of an EC2 instance like this:
+
+resource "aws_instance" "example" {
+  ami           = "ami-0ff8a91507f77f867"
+  instance_type = "t2.micro"
+}
+
+# Output-1
+output "public_ip" {
+  value = aws_instance.example.public_ip
+}
+
+#Output-2
+output "private_ip" {
+  value = aws_instance.example.private_ip
+} 
+
+4)Print DNS name of Database - Exposing the DNS name of a database to be used by other parts of the infrastructure for connecting to the database.
+
+resource "aws_rds_cluster" "example" {
+  cluster_identifier = "example"
+  master_username    = "example"
+  master_password    = "example"
+  db_subnet_group_name = aws_db_subnet_group.example.name
+}
+
+#The following output variable will print the DNS name of AWS RDS cluster
+output "rds_cluster_endpoint" {
+  value = aws_rds_cluster.example.endpoint
+} 
+
+5)How to print the public_ip of aws_instance?
+
+provider "aws" {
+   region     = "eu-central-1"
+   access_key = <YOUR_ACCESS_KEY>
+   secret_key = <YOUR_SECRET_KEY>
+}
+
+resource "aws_instance" "ec2_example" {
+   
+   ami           = "ami-0767046d1677be5a0"
+   instance_type = "t2.micro"
+   subnet_id = aws_subnet.staging-subnet.id
+   
+   tags = {
+           Name = "test - Terraform EC2"
+   }
+}
